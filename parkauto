@@ -1,0 +1,188 @@
+# Import the required libraries
+from tkinter import *
+from tkinter import ttk, filedialog
+from matplotlib import pyplot as plt
+from PIL import ImageTk, Image
+import numpy as np
+import pandas as pd
+
+
+# Create an instance of tkinter frame
+win = Tk()
+
+# Set the size of the tkinter window
+win.geometry("800x500")
+win.title('Park-Auto')
+
+# Create an object of Style widget
+style = ttk.Style()
+style.theme_use('clam')
+
+# Create a Frame
+frame = Frame(win)
+frame.pack(pady=20)
+# Define a function for opening the file
+def open_file():
+   global filename, df
+   filename = filedialog.askopenfilename(title="Open a File", filetype=(("csv files", ".*csv"),("All Files", "*.")))
+
+   if filename:
+      try:
+         filename = r"{}".format(filename)
+         df = pd.read_csv(filename)
+      except ValueError:
+         label.config(text="File could not be opened")
+      except FileNotFoundError:
+         label.config(text="File Not Found")
+
+   # Clear all the previous data in tree
+   clear_treeview()
+
+   # Add new data in Treeview widget
+   tree["column"] = list(df.columns)
+   tree["show"] = "headings"
+
+   # For Headings iterate over the columns
+   for col in tree["column"]:
+      tree.heading(col, text=col)
+
+   # Put Data in Rows
+   df_rows = df.to_numpy().tolist()
+   for row in df_rows:
+       tree.insert("", "end", values=row)
+
+   tree.pack(expand=True,fill='y')
+
+# Clear the Treeview Widget
+def clear_treeview():
+   tree.delete(*tree.get_children())
+
+# Create a Treeview widget
+tree = ttk.Treeview(frame)
+
+def chart1():
+    #bar chart
+    
+    #sr1=file.sort_values('Model')
+    x_axis = df['Model']
+    y_axis = df['Combustibil']
+    
+    plt.bar(x_axis, y_axis)
+    plt.title("Grafic Model - Combustibil")
+    plt.xlabel("Model")
+    plt.ylabel("Combustibil")
+    plt.show()
+
+
+def chart2():
+    
+    sr2 = df.sort_values('Model')
+    x = sr2['Motor']
+    y = sr2['Model']
+
+    fig, ax = plt.subplots()
+    ax.plot(y, x)
+
+    ax.set(xlabel='Model', ylabel='Capacitate motor',
+       title='Grafic Model - Capacitate motor')
+    ax.grid()
+   
+    plt.show()
+  
+    
+
+def chart3():
+    #line chart
+    
+    #file=pd.read_csv('F:\excelCSV\Autotest.csv')
+    sr3=df.sort_values('Consum')
+    x_axis = sr3['Consum']
+    y_axis = sr3['Model']
+    
+    plt.title("Grafic Model - Consum")
+    plt.xlabel('Consum')
+    plt.ylabel('Model')
+    plt.scatter(x_axis,y_axis)
+    plt.plot(x_axis,y_axis)
+    plt.show()
+
+
+def chart4():
+    fig, ax = plt.subplots()
+
+# Example data
+    model = df['Model']
+    y_pos = np.arange(len(model))
+    culoare = df['Culoare']
+    error = np.random.rand(len(model))
+
+    ax.barh(y_pos, culoare, xerr=error, align='center')
+    ax.set_yticks(y_pos, labels=model)
+    ax.invert_yaxis()  # labels read top-to-bottom
+    ax.set_xlabel('Culoare')
+    ax.set_ylabel('Model')
+    ax.set_title('Grafic Model - Culoare')
+
+    plt.show()
+    
+def chart5():
+    x_axis = df['Model']
+    y_axis = df['Pret']
+    
+    plt.bar(x_axis, y_axis)
+    plt.title("Grafic Model - Pret")
+    plt.xlabel("Model")
+    plt.ylabel("Pret($)")
+    plt.scatter(x_axis,y_axis)
+    plt.show()
+    
+    
+def chart6():
+   sr6 = df.sort_values('Anfab')
+   x_axis = sr6['Anfab']
+   y_axis = sr6['Model']
+    
+   plt.title("Grafic Model - Anul fabricatiei")
+   plt.xlabel('Anul fabricatiei')
+   plt.ylabel('Model')
+   plt.scatter(x_axis,y_axis)
+   plt.plot(x_axis,y_axis)
+   plt.show()
+   
+
+   
+   
+    
+    
+    
+# Add a Menu
+menuBar = Menu(win)
+win.config(menu=menuBar)
+
+# Add Menu Dropdown
+file_menu = Menu(menuBar, tearoff=0)
+menuBar.add_cascade(label="Menu", menu=file_menu)
+file_menu.add_command(label="Open file", command=open_file)
+file_menu.add_command(label="Quit", command=quit)
+chartMenu = Menu(menuBar,tearoff=0)
+menuBar.add_cascade(label="Chart",menu=chartMenu)
+chartMenu.add_command(label='Grafic Model - Combustibil',command=chart1)                  # OK
+chartMenu.add_command(label='Grafic Model - Capacitate motor',command=chart2)             # OK
+chartMenu.add_command(label='Grafic Model - Consum',command=chart3)                       # OK
+chartMenu.add_command(label='Grafic Model - Culoare',command=chart4)                      # OK
+chartMenu.add_command(label='Grafic Model - Pret',command=chart5)                         # OK
+chartMenu.add_command(label='Grafic Model - Anul fabricatiei',command=chart6)             # OK
+
+frame = Frame(win, width=600, height=400)
+frame.pack()
+frame.place(anchor='n', relx=0.5, rely=0.5) 
+
+img = ImageTk.PhotoImage(Image.open("autopark.jpg"))
+
+label = Label(frame, image = img)
+label.pack()
+# Add a Label widget to display the file content
+label = Label(win, text='')
+label.pack(pady=20)
+
+win.mainloop()
